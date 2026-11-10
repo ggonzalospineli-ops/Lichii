@@ -163,6 +163,13 @@ TEST_CASE("Ampere geometry exit setup results must be dead before the body reads
     RequireAccepted(code);
     code[9].words[0] = 0x03037324;
     RequireRejected(code, reads, 0x90);
+    // LDG.E.U8 R1, [R4.64] with the load predicate P0 (encoded 7-P) reads the setup's P0;
+    // without a load predicate it does not.
+    code = Program;
+    code[7] = Instruction{{0x04017381, 0, 0x001e8107, 0x000e2800}};
+    RequireRejected(code, reads, 0x70);
+    code[7].words[2] = 0x001e8100;
+    RequireAccepted(code);
 }
 
 TEST_CASE("Ampere geometry exit body cannot touch the handler state", "[video_core][ampere]") {
